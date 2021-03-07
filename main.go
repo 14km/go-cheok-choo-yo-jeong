@@ -3,38 +3,53 @@ package main
 import (
 	"fmt"
 	"log"
-	_ "os"
+	"os"
 
-	_ "github.com/K-Connor/go-cheok-choo-yo-jeong/controllers/slack"
+	"github.com/K-Connor/go-cheok-choo-yo-jeong/controllers/slack"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/joho/godotenv"
 )
 
-type MyEvent struct {
-	Name string `json:"What is your name?"`
-	Age  int    `json:"How old are you?"`
+type MessageRequestEvent struct {
+	Text string `json:"text"`
 }
 
-type MyResponse struct {
+type MessageResponse struct {
 	Message string `json:"Answer:"`
 }
 
-func HandleLambdaEvent(event MyEvent) (MyResponse, error) {
-	err := godotenv.Load()
+func HandleLambdaEvent(event MessageRequestEvent) (MessageResponse, error) {
+	slack.SetSlackUrl(goDotEnvVariable("SLACK_URL"))
+
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("CheokChooYoJeong Error : ", err)
+		}
+	}()
+
+	body, err := slack.SendCheokChooYoJeong()
 
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err)
 	}
 
-	//os.Getenv("")
-	//
-	//slack.NewSlack(event.text)
-	//
-	//slack.SendMessage()
-
-	return MyResponse{Message: fmt.Sprintf("%s is %d years old!", event.Name, event.Age)}, nil
+	return MessageResponse{Message: fmt.Sprint(string(body))}, nil
 }
 
 func main() {
 	lambda.Start(HandleLambdaEvent)
+}
+
+// use godot package to load/read the .env file and
+// return the value of the key
+func goDotEnvVariable(key string) string {
+
+	// load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	return os.Getenv(key)
 }
