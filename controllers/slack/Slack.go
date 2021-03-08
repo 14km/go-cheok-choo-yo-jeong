@@ -18,12 +18,8 @@ func SetSlackUrl(url string) {
 	slackUrl = url
 }
 
-//func NewMessageRequest(text string) *MessageRequest {
-//	return &MessageRequest{Text: text}
-//}
-
 func SendCheokChooYoJeong() (body []byte, err error) {
-	jsonBytes, _ := json.Marshal(MessageRequest{"여러분 척추를 피고 일을 하세요!"})
+	jsonBytes, _ := json.Marshal(MessageRequest{"여러분, 아프니까 척추입니다! 모두들 척추를 펴고 일을 하세요!"})
 	buff := bytes.NewBuffer(jsonBytes)
 
 	req, _ := http.NewRequest(

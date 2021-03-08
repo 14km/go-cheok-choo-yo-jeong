@@ -2,12 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"github.com/aws/aws-lambda-go/lambda"
 	"os"
 
 	"github.com/K-Connor/go-cheok-choo-yo-jeong/controllers/slack"
-	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/joho/godotenv"
 )
 
 type MessageRequestEvent struct {
@@ -16,6 +14,10 @@ type MessageRequestEvent struct {
 
 type MessageResponse struct {
 	Message string `json:"Answer:"`
+}
+
+func main() {
+	lambda.Start(HandleLambdaEvent)
 }
 
 func HandleLambdaEvent(event MessageRequestEvent) (MessageResponse, error) {
@@ -36,20 +38,8 @@ func HandleLambdaEvent(event MessageRequestEvent) (MessageResponse, error) {
 	return MessageResponse{Message: fmt.Sprint(string(body))}, nil
 }
 
-func main() {
-	lambda.Start(HandleLambdaEvent)
-}
-
 // use godot package to load/read the .env file and
 // return the value of the key
 func goDotEnvVariable(key string) string {
-
-	// load .env file
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
 	return os.Getenv(key)
 }
